@@ -1,4 +1,4 @@
-package com.banco.xyz.bff_mobile.dto.mobile;
+﻿package com.banco.xyz.bff_mobile.dto.mobile;
 
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;

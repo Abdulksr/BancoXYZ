@@ -1,4 +1,4 @@
-package com.banco.xyz.bff_atm.config;
+﻿package com.banco.xyz.bff_atm.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

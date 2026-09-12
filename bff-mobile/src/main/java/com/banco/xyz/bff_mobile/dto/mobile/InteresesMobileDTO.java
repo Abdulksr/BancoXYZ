@@ -1,4 +1,4 @@
-package com.banco.xyz.bff_mobile.dto.mobile;
+﻿package com.banco.xyz.bff_mobile.dto.mobile;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

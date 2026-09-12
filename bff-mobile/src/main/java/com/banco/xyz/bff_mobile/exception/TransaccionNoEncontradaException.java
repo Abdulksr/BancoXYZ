@@ -1,4 +1,4 @@
-package com.banco.xyz.bff_mobile.exception;
+﻿package com.banco.xyz.bff_mobile.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

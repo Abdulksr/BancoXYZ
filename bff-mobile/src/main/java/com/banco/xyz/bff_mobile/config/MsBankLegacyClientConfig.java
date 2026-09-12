@@ -1,4 +1,4 @@
-package com.banco.xyz.bff_mobile.config;
+﻿package com.banco.xyz.bff_mobile.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
