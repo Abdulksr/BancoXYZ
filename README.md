@@ -4,8 +4,13 @@
 Este proyecto implementa una arquitectura de microservicios utilizando el patrón **Backend for Frontend (BFF)** para el Banco XYZ. El objetivo principal es optimizar la comunicación entre el sistema central (Core) y los distintos canales de atención (Web, Móvil y Cajeros Automáticos), proporcionando a cada cliente una API adaptada a sus necesidades específicas de ancho de banda, seguridad y experiencia de usuario.
 
 ## Estructura del Código 🏗️
-El sistema está dividido en un "Workspace Multimódulo" con 4 microservicios independientes:
+El sistema está dividido en un "Workspace Multimódulo" con los siguientes componentes:
 
+### Ecosistema Spring Cloud
+1. **`eureka-server` (Puerto 8761):** Servidor de descubrimiento de servicios.
+2. **`config-server` (Puerto 8888):** Servidor de configuración centralizada (obtiene propiedades de la carpeta `config-data`).
+
+### Microservicios de Negocio
 1. **`bank_legacy` (Core - Puerto 8080):** 
    - Actúa como la fuente de la verdad.
    - Contiene la conexión a la base de datos MySQL y expone los datos crudos a través de endpoints REST internos.
@@ -25,12 +30,18 @@ El sistema está dividido en un "Workspace Multimódulo" con 4 microservicios in
    - **Mapeo de Datos:** Interfaz ultra-ligera y segura exponiendo únicamente los saldos y montos para operaciones críticas.
    - **Seguridad:** Protegido con HTTPS y Tokens JWT. Usuario: `admin_atm`.
 
-## Patrones Utilizados ⚙️
+## Patrones y Tecnologías Utilizadas ⚙️
 - **Backend for Frontend (BFF):** Separación de interfaces para clientes.
-- **Data Transfer Object (DTO):** Mapeo de `CoreDTO` a `WebDTO/MobileDTO/AtmDTO` para desacoplar el modelo de base de datos de la respuesta al cliente.
-- **RestClient:** Cliente HTTP moderno de Spring Boot 3.2+ para la comunicación sincrónica entre los BFFs y el Core.
-- **Spring Security (JWT):** Autenticación sin estado (STATELESS) usando `jjwt`, con Filtros personalizados de intercepción de peticiones HTTP.
-- **SSL/TLS:** Configuración local con `keytool` para cifrado de red (HTTPS) con certificados PKCS12.
+- **Data Transfer Object (DTO):** Mapeo de `CoreDTO` a `WebDTO/MobileDTO/AtmDTO` para evitar fuga de información.
+- **Resiliencia (Resilience4j):** Protección robusta en la comunicación hacia el Core Legacy mediante:
+  - **Circuit Breaker:** Corta la conexión si el backend falla, dándole tiempo para recuperarse.
+  - **Retry:** Reintenta automáticamente las peticiones ante fallos transitorios.
+  - **Rate Limiter:** Limita la tasa de solicitudes hacia el core para evitar saturación.
+  - **Fallbacks:** Manejo de errores gracefully (ej. retornando `null` o listas vacías y logueando apropiadamente).
+- **RestClient con Timeouts:** Cliente HTTP configurado explícitamente con *Connect Timeout* y *Read Timeout* inyectados por properties, previniendo el agotamiento de hilos.
+- **Spring Cloud:** Configuración distribuida (`config-server`) y service discovery (`eureka-server`).
+- **Spring Security (JWT):** Autenticación STATELESS con Filtros personalizados.
+- **SSL/TLS:** Cifrado de red (HTTPS) con certificados PKCS12 locales.
 
 ## Instrucciones de Ejecución 🚀
 
@@ -39,11 +50,11 @@ El sistema está dividido en un "Workspace Multimódulo" con 4 microservicios in
 - Base de datos MySQL corriendo en el puerto 3306 (con los datos cargados del batch previo).
 
 ### 2. Levantamiento de Servicios
-Es estrictamente necesario arrancar los servicios en el siguiente orden:
-1. Levantar el proyecto `bank_legacy` (Core HTTP).
-2. Levantar el proyecto `bff-web` (HTTPS).
-3. Levantar el proyecto `bff-mobile` (HTTPS).
-4. Levantar el proyecto `bff-atm` (HTTPS).
+Es estrictamente necesario arrancar los servicios en el siguiente orden para evitar fallos de conexión:
+1. Levantar el proyecto `eureka-server`.
+2. Levantar el proyecto `config-server`.
+3. Levantar el proyecto `bank_legacy` (Core HTTP).
+4. Levantar los proyectos BFFs (`bff-web`, `bff-mobile`, `bff-atm`).
 
 ### 3. Pruebas de APIs (Flujo JWT)
 Para consumir cualquier API, primero debes autenticarte en el canal correspondiente para obtener tu Token JWT, y luego inyectarlo como Bearer Token.

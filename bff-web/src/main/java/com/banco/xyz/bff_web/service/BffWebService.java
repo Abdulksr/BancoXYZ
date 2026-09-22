@@ -52,11 +52,14 @@ public class BffWebService {
     }
 
     private EstadoCuentaWebDTO mapToEstadoCuentaWebDTO(EstadoCuentaCoreDTO core) {
-        return new EstadoCuentaWebDTO(core.getId(), core.getCuentaId(), core.getCantidadTransacciones(), core.getTotalIngresos(), core.getTotalRetiros(), core.getFechaProceso(), core.getAnio(), core.getSaldoFinal());
+        return new EstadoCuentaWebDTO(core.getId(), core.getCuentaId(), core.getCantidadTransacciones(),
+                core.getTotalIngresos(), core.getTotalRetiros(), core.getFechaProceso(), core.getAnio(),
+                core.getSaldoFinal());
     }
 
     private InteresesWebDTO mapToInteresesWebDTO(InteresesCoreDTO core) {
-        return new InteresesWebDTO(core.getCuentaId(), core.getNombre(), core.getSaldo(), core.getEdad(), core.getTipo());
+        return new InteresesWebDTO(core.getCuentaId(), core.getNombre(), core.getSaldo(), core.getEdad(),
+                core.getTipo());
     }
 
     private TransaccionesWebDTO mapToTransaccionesWebDTO(TransaccionesCoreDTO core) {
