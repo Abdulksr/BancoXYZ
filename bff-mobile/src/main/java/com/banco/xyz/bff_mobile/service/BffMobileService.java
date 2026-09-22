@@ -1,4 +1,4 @@
-﻿package com.banco.xyz.bff_mobile.service;
+package com.banco.xyz.bff_mobile.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,14 +52,17 @@ public class BffMobileService {
     }
 
     private EstadoCuentaMobileDTO mapToEstadoCuentaMobileDTO(EstadoCuentaCoreDTO core) {
+        if (core == null) return null;
         return new EstadoCuentaMobileDTO(core.getCuentaId(), core.getAnio(), core.getSaldoFinal());
     }
 
     private InteresesMobileDTO mapToInteresesMobileDTO(InteresesCoreDTO core) {
+        if (core == null) return null;
         return new InteresesMobileDTO(core.getCuentaId(), core.getSaldo(), core.getTipo());
     }
 
     private TransaccionMobileDTO mapToTransaccionMobileDTO(TransaccionesCoreDTO core) {
+        if (core == null) return null;
         return new TransaccionMobileDTO(core.getFecha(), core.getMonto(), core.getTipo());
     }
 }

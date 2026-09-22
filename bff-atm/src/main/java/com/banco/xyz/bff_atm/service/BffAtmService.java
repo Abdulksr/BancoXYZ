@@ -1,4 +1,4 @@
-﻿package com.banco.xyz.bff_atm.service;
+package com.banco.xyz.bff_atm.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,14 +52,17 @@ public class BffAtmService {
     }
 
     private EstadoCuentaAtmDTO mapToEstadoCuentaAtmDTO(EstadoCuentaCoreDTO core) {
+        if (core == null) return null;
         return new EstadoCuentaAtmDTO(core.getCuentaId(), core.getSaldoFinal());
     }
 
     private InteresesAtmDTO mapToInteresesAtmDTO(InteresesCoreDTO core) {
+        if (core == null) return null;
         return new InteresesAtmDTO(core.getCuentaId(), core.getSaldo());
     }
 
     private TransaccionAtmDTO mapToTransaccionAtmDTO(TransaccionesCoreDTO core) {
+        if (core == null) return null;
         return new TransaccionAtmDTO(core.getMonto(), core.getTipo());
     }
 }
