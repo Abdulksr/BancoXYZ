@@ -1,80 +1,89 @@
-# Banco XYZ - Arquitectura Backend for Frontend (BFF) 🏦
+﻿# Banco XYZ - Arquitectura Híbrida de Microservicios 🚀 (Fase Final - Semana 8)
 
-## Objetivo del Proyecto 🎯
-Este proyecto implementa una arquitectura de microservicios utilizando el patrón **Backend for Frontend (BFF)** para el Banco XYZ. El objetivo principal es optimizar la comunicación entre el sistema central (Core) y los distintos canales de atención (Web, Móvil y Cajeros Automáticos), proporcionando a cada cliente una API adaptada a sus necesidades específicas de ancho de banda, seguridad y experiencia de usuario.
+Este proyecto implementa la arquitectura definitiva del Banco XYZ, evolucionando de un patrón Backend for Frontend (BFF) local a una **Arquitectura Híbrida en la Nube**, cumpliendo con los más altos estándares de orquestación (Docker), seguridad delegada (OAuth2) y procesamiento asíncrono de alto rendimiento (Apache Kafka).
 
-## Estructura del Código 🏗️
-El sistema está dividido en un "Workspace Multimódulo" con los siguientes componentes:
+---
 
-### Ecosistema Spring Cloud
-1. **`eureka-server` (Puerto 8761):** Servidor de descubrimiento de servicios.
-2. **`config-server` (Puerto 8888):** Servidor de configuración centralizada (obtiene propiedades de la carpeta `config-data`).
+## 🏗️ Estructura de la Arquitectura
+El ecosistema completo ha sido dockerizado y se compone de **8 contenedores** interconectados:
 
-### Microservicios de Negocio
-1. **`bank_legacy` (Core - Puerto 8080):** 
-   - Actúa como la fuente de la verdad.
-   - Contiene la conexión a la base de datos MySQL y expone los datos crudos a través de endpoints REST internos.
+### Ecosistema de Soporte y Seguridad
+1. **mysql-db (Puerto 3307):** Base de datos relacional aislada en Docker para el almacenamiento del Core.
+2. **eureka-server (Puerto 8761):** Servidor de descubrimiento de servicios.
+3. **config-server (Puerto 8888):** Servidor de configuración centralizada (lee de config-data).
+4. **auth-server (Puerto 9000):** NUEVO Servidor de Autorización **OAuth2**. Actúa como el único emisor de tokens JWT (Identity Provider).
 
-2. **`bff-web` (Puerto 8081 - HTTPS):**
-   - **Propósito:** Optimizado para navegadores de escritorio.
-   - **Mapeo de Datos:** Proporciona datos completos para soportar interfaces complejas (grids, reportes financieros).
-   - **Seguridad:** Protegido con HTTPS (Certificado SSL) y Tokens JWT (JSON Web Tokens). Usuario: `admin_web`.
+### Microservicios de Negocio (Resource Servers)
+5. **bank_legacy (Core - Puerto 8080):** 
+   - Contiene la conexión a MySQL y expone los datos crudos.
+   - Actúa como **Consumidor de Kafka**, procesando lotes de transacciones masivas (Spring Batch) y confirmando con Acks manuales para evitar Poison Pills.
 
-3. **`bff-mobile` (Puerto 8082 - HTTPS):**
-   - **Propósito:** Optimizado para aplicaciones móviles.
-   - **Mapeo de Datos:** Respuestas ligeras. Oculta IDs internos y datos no esenciales para ahorrar ancho de banda de red celular.
-   - **Seguridad:** Protegido con HTTPS y Tokens JWT. Usuario: `admin_mobile`.
+6. **bff-web (Puerto 8081 - HTTPS):**
+   - **Propósito:** Optimizado para navegadores. Expone reportes financieros.
+   - **Kafka Producer:** Envía eventos de transacciones hacia la nube.
+   - **Seguridad:** Configurado como OAuth2 Resource Server. Valida JWTs emitidos por el Auth-server y exige scopes granulares (cuentas.read, cuentas.write).
 
-4. **`bff-atm` (Puerto 8083 - HTTPS):**
-   - **Propósito:** Cajeros Automáticos.
-   - **Mapeo de Datos:** Interfaz ultra-ligera y segura exponiendo únicamente los saldos y montos para operaciones críticas.
-   - **Seguridad:** Protegido con HTTPS y Tokens JWT. Usuario: `admin_atm`.
+7. **bff-mobile (Puerto 8082 - HTTPS):** Respuestas ligeras para ahorro de ancho de banda. Protegido con OAuth2.
+8. **bff-atm (Puerto 8083 - HTTPS):** Respuestas ultra-ligeras para cajeros automáticos. Protegido con OAuth2.
 
-## Patrones y Tecnologías Utilizadas ⚙️
-- **Backend for Frontend (BFF):** Separación de interfaces para clientes.
-- **Data Transfer Object (DTO):** Mapeo de `CoreDTO` a `WebDTO/MobileDTO/AtmDTO` para evitar fuga de información.
-- **Resiliencia (Resilience4j):** Protección robusta en la comunicación hacia el Core Legacy mediante:
-  - **Circuit Breaker:** Corta la conexión si el backend falla, dándole tiempo para recuperarse.
-  - **Retry:** Reintenta automáticamente las peticiones ante fallos transitorios.
-  - **Rate Limiter:** Limita la tasa de solicitudes hacia el core para evitar saturación.
-  - **Fallbacks:** Manejo de errores gracefully (ej. retornando `null` o listas vacías y logueando apropiadamente).
-- **RestClient con Timeouts:** Cliente HTTP configurado explícitamente con *Connect Timeout* y *Read Timeout* inyectados por properties, previniendo el agotamiento de hilos.
-- **Spring Cloud:** Configuración distribuida (`config-server`) y service discovery (`eureka-server`).
-- **Spring Security (JWT):** Autenticación STATELESS con Filtros personalizados.
-- **SSL/TLS:** Cifrado de red (HTTPS) con certificados PKCS12 locales.
+### La Nube (AWS EC2)
+- **Apache Kafka + Zookeeper:** El clúster de mensajería está desplegado externamente en una instancia EC2 de AWS (3.233.6.38:29092), consolidando una arquitectura híbrida (On-Premise Docker + Cloud).
 
-## Instrucciones de Ejecución 🚀
+---
+
+## 🛡️ Patrones y Tecnologías Implementadas (Semana 8)
+
+- **Backend for Frontend (BFF):** Separación de canales de atención (Web, Mobile, ATM).
+- **OAuth2.0 (Client Credentials Grant):** Se eliminó la seguridad manual. Ahora la autenticación está delegada al Auth-server (Máquina a Máquina). 
+  - *Cajero:* Solo lectura (cuentas.read).
+  - *Administrador:* Lectura y escritura (cuentas.write).
+- **Arquitectura Híbrida de Eventos (Kafka):** Comunicación asíncrona tolerante a fallos. El productor inyecta eventos desde la red local hacia la nube, y el consumidor en el Core los descarga y procesa mediante Spring Batch.
+- **Docker Multi-Stage Build:** Creación de imágenes Java súper ligeras. Docker se encarga de compilar el código fuente sin requerir herramientas instaladas en el Host.
+- **Docker Compose:** Orquestación de red interna (depends_on, 
+estart: on-failure) para auto-curación del clúster sin intervención humana.
+- **Resilience4j:** Protección robusta en la comunicación hacia el Core Legacy mediante Circuit Breaker, Retry, Rate Limiter y rutinas de *Fallback* controladas.
+- **SSL/TLS:** Cifrado de red (HTTPS) local.
+
+---
+
+## 🚀 Guía Definitiva de Despliegue
 
 ### 1. Pre-requisitos
-- Java 17+
-- Base de datos MySQL corriendo en el puerto 3306 (con los datos cargados del batch previo).
+- **Docker Desktop** instalado y corriendo.
+- (Opcional) Instancia de Kafka corriendo en AWS.
 
-### 2. Levantamiento de Servicios
-Es estrictamente necesario arrancar los servicios en el siguiente orden para evitar fallos de conexión:
-1. Levantar el proyecto `eureka-server`.
-2. Levantar el proyecto `config-server`.
-3. Levantar el proyecto `bank_legacy` (Core HTTP).
-4. Levantar los proyectos BFFs (`bff-web`, `bff-mobile`, `bff-atm`).
+### 2. Levantamiento de TODO el Ecosistema (Un Solo Clic)
+Ya no es necesario levantar proyectos manualmente desde el IDE ni tener MySQL instalado.
+Simplemente abre una terminal en la carpeta raíz (BancoXYZ_Microservicios) y ejecuta:
 
-### 3. Pruebas de APIs (Flujo JWT)
-Para consumir cualquier API, primero debes autenticarte en el canal correspondiente para obtener tu Token JWT, y luego inyectarlo como Bearer Token.
+`bash
+docker-compose up -d --build
+`
+*Docker compilará el código de los 7 microservicios, descargará MySQL y encenderá todo en el orden correcto.*
 
-**Ejemplo BFF Web:**
-1. Haz un **POST** a `https://localhost:8081/auth/bff-web/login` con el siguiente Body JSON:
-   ```json
-   {
-       "username": "admin_web",
-       "password": "12345"
-   }
-   ```
-2. Copia el token de la respuesta.
-3. Haz un **GET** a `https://localhost:8081/api/bff-web/transacciones` enviando en los Headers HTTP:
-   `Authorization: Bearer <TU_TOKEN>`
+### 3. Pruebas End-to-End en Postman
 
-**Ejemplo BFF Mobile:**
-- URL de Login: `https://localhost:8082/auth/bff-mobile/login`
-- Usuario: `admin_mobile` / `12345`
+**A. Obtener el Token (OAuth2 Auth Server)**
+Para consumir los BFFs, primero debes pedirle un JWT al servidor de autorización.
+- **Endpoint:** POST http://localhost:9000/oauth2/token
+- **Auth (Basic):** Usuario:  admin-client / Password:  admin123
+- **Body (x-www-form-urlencoded):** 
+  - grant_type: client_credentials
+  - scope: cuentas.read cuentas.write
 
-**Ejemplo BFF ATM:**
-- URL de Login: `https://localhost:8083/auth/bff-atm/login`
-- Usuario: `admin_atm` / `12345`
+**B. Consumir Datos del Core (Circuit Breaker & Scopes)**
+- **Endpoint:** GET https://localhost:8081/api/bff-web/estadoCuentas
+- **Headers:** Authorization: Bearer <TU_TOKEN>
+- *(Requiere permiso cuentas.read. Si bank_legacy se apaga, retornará un JSON vacío [] gracias a Resilience4j).*
+
+**C. Disparar Evento a la Nube (AWS Kafka Producer)**
+- **Endpoint:** POST https://localhost:8081/api/bff-web/kafka/transacciones-batch
+- **Headers:** Authorization: Bearer <TU_TOKEN>
+- *(Requiere permiso cuentas.write)*.
+- **Body JSON:**
+  `json
+  {
+      "tipoProceso": "BATCH_TRANSACCIONES"
+  }
+  `
+- *Resultado:* El BFF confirmará (HTTP 200) y enviará el mensaje a AWS. Segundos después, la consola del bank-legacy en Docker imprimirá el procesamiento exitoso del evento.

@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: banco_xyz_batch
+    ports:
+      - "3307:3306"
+
+  config-server:
+    build: ./config-server
+    container_name: config-server
+    restart: on-failure
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./config-data:/config-data
+    environment:
+      - SPRING_PROFILES_ACTIVE=native
+      - SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS=file:///config-data
+
+  eureka-server:
+    build: ./eureka-server
+    container_name: eureka-server
+    restart: on-failure
+    ports:
+      - "8761:8761"
+    depends_on:
+      - config-server
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+
+  auth-server:
+    build: ./auth-server
+    container_name: auth-server
+    restart: on-failure
+    ports:
+      - "9000:9000"
+
+  bank-legacy:
+    build: ./bank_legacy
+    container_name: bank-legacy
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    depends_on:
+      - config-server
+      - eureka-server
+      - mysql-db
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/banco_xyz_batch?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+
+  bff-web:
+    build: ./bff-web
+    container_name: bff-web
+    restart: on-failure
+    ports:
+      - "8081:8081"
+    depends_on:
+      - config-server
+      - eureka-server
+      - auth-server
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - MS-BANK-LEGACY_URL=http://bank-legacy:8080
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://auth-server:9000
+
+  bff-mobile:
+    build: ./bff-mobile
+    container_name: bff-mobile
+    restart: on-failure
+    ports:
+      - "8082:8082"
+    depends_on:
+      - config-server
+      - eureka-server
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - MS-BANK-LEGACY_URL=http://bank-legacy:8080
+
+  bff-atm:
+    build: ./bff-atm
+    container_name: bff-atm
+    restart: on-failure
+    ports:
+      - "8083:8083"
+    depends_on:
+      - config-server
+      - eureka-server
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - MS-BANK-LEGACY_URL=http://bank-legacy:8080
+
+

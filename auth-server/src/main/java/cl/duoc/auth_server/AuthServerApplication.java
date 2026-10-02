@@ -1,13 +1,13 @@
-package com.banco.xyz.bff_mobile;
+package cl.duoc.auth_server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class BffMobileApplication {
+public class AuthServerApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(BffMobileApplication.class, args);
+		SpringApplication.run(AuthServerApplication.class, args);
 	}
 
 }

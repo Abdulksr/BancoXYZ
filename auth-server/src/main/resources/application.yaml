@@ -1,0 +1,42 @@
+server:
+  port: 9000
+
+spring:
+  application:
+    name: auth-server
+
+  security:
+    oauth2:
+      authorizationserver:
+        client:
+          cajero-client:
+            registration:
+              client-id: cajero-client
+              client-secret: "{noop}cajero123"
+              client-authentication-methods:
+                - client_secret_basic
+              authorization-grant-types:
+                - client_credentials
+              scopes:
+                - cuentas.read
+            require-authorization-consent: false
+
+          admin-client:
+            registration:
+              client-id: admin-client
+              client-secret: "{noop}admin123"
+              client-authentication-methods:
+                - client_secret_basic
+              authorization-grant-types:
+                - client_credentials
+              scopes:
+                - cuentas.read
+                - cuentas.write
+            require-authorization-consent: false
+
+        issuer: http://auth-server:9000
+
+logging:
+  level:
+    org.springframework.security: INFO
+
