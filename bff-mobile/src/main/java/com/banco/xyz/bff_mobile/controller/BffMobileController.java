@@ -1,12 +1,14 @@
-package com.banco.xyz.bff_mobile.controller;
+﻿package com.banco.xyz.bff_mobile.controller;
 
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 
 import com.banco.xyz.bff_mobile.dto.mobile.EstadoCuentaMobileDTO;
 import com.banco.xyz.bff_mobile.dto.mobile.InteresesMobileDTO;
@@ -21,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class BffMobileController {
 
     private final BffMobileService service;
+    
 
     @GetMapping("/estadoCuentas")
     public ResponseEntity<List<EstadoCuentaMobileDTO>> listadoEstadoCuentas() {
@@ -51,4 +54,13 @@ public class BffMobileController {
     public ResponseEntity<TransaccionMobileDTO> obtenerTransaccionPorId(@PathVariable Long id) {
         return ResponseEntity.ok(service.obtenerTransaccionPorId(id));
     }
+
+    
+
+    
+
+    
 }
+
+
+

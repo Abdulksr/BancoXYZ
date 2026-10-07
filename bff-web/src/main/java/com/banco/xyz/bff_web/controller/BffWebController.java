@@ -1,4 +1,4 @@
-package com.banco.xyz.bff_web.controller;
+﻿package com.banco.xyz.bff_web.controller;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.banco.xyz.bff_web.dto.event.EventoTransaccionDTO;
+import com.banco.xyz.bff_web.dto.event.EventoBatchDTO;
 import com.banco.xyz.bff_web.dto.web.EstadoCuentaWebDTO;
 import com.banco.xyz.bff_web.dto.web.InteresesWebDTO;
 import com.banco.xyz.bff_web.dto.web.TransaccionesWebDTO;
@@ -57,9 +57,31 @@ public class BffWebController {
         return ResponseEntity.ok(service.obtenerTransaccionPorId(id));
     }
 
-    @PostMapping("/kafka/transacciones-batch")
-    public ResponseEntity<EventoTransaccionDTO> transaccionesBatch(@RequestBody EventoTransaccionDTO evento) {
-        kafkaProducerService.enviarEventoTransaccion(evento);
-        return ResponseEntity.ok(evento);
+    
+
+    @PostMapping("/kafka/batch/transacciones")
+    public ResponseEntity<Void> iniciarBatchTransacciones() {
+        EventoBatchDTO evento = new EventoBatchDTO();
+        evento.setTipoProceso("BATCH_TRANSACCIONES");
+        kafkaProducerService.enviarEventoBatch(evento);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/kafka/batch/intereses")
+    public ResponseEntity<Void> iniciarBatchIntereses() {
+        EventoBatchDTO evento = new EventoBatchDTO();
+        evento.setTipoProceso("BATCH_INTERESES");
+        kafkaProducerService.enviarEventoBatch(evento);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/kafka/batch/estados-cuenta")
+    public ResponseEntity<Void> iniciarBatchEstadosCuenta() {
+        EventoBatchDTO evento = new EventoBatchDTO();
+        evento.setTipoProceso("BATCH_ESTADOS_CUENTA");
+        kafkaProducerService.enviarEventoBatch(evento);
+        return ResponseEntity.ok().build();
     }
 }
+
+

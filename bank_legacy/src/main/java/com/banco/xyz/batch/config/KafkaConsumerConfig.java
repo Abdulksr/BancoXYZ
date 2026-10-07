@@ -1,4 +1,4 @@
-package com.banco.xyz.batch.config;
+﻿package com.banco.xyz.batch.config;
 
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.kafka.listener.ContainerProperties;
-import com.banco.xyz.batch.dtos.event.EventoTransaccionDto;
+import com.banco.xyz.batch.dtos.event.EventoBatchDTO;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,7 +19,7 @@ import java.util.Map;
 public class KafkaConsumerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
-    public static final String TOPIC = "transacciones-topic";
+    public static final String TOPIC = "batch-process-topic";
     public static final String CONSUMER_GROUP_ID = "bank-legacy-group";
 
     @Bean
@@ -30,7 +30,7 @@ public class KafkaConsumerConfig {
     }
 
     @Bean
-    ConsumerFactory<String, EventoTransaccionDto> consumerFactory() {
+    ConsumerFactory<String, EventoBatchDTO> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, CONSUMER_GROUP_ID);
@@ -39,15 +39,17 @@ public class KafkaConsumerConfig {
         return new DefaultKafkaConsumerFactory<>(
                 props,
                 new StringDeserializer(),
-                new JsonDeserializer<>(EventoTransaccionDto.class, false));
+                new JsonDeserializer<>(EventoBatchDTO.class, false));
     }
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<String, EventoTransaccionDto> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, EventoTransaccionDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    ConcurrentKafkaListenerContainerFactory<String, EventoBatchDTO> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, EventoBatchDTO> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
 
         return factory;
     }
 }
+
+

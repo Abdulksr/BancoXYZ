@@ -1,4 +1,4 @@
-package com.banco.xyz.bff_web.config;
+﻿package com.banco.xyz.bff_web.config;
 
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -13,7 +13,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
-import com.banco.xyz.bff_web.dto.event.EventoTransaccionDTO;
+import com.banco.xyz.bff_web.dto.event.EventoBatchDTO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +25,7 @@ public class KafkaProducerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    public static final String TOPIC = "transacciones-topic";
+    public static final String TOPIC = "batch-process-topic";
 
     @Bean
     KafkaAdmin kafkaAdmin() {
@@ -39,12 +39,12 @@ public class KafkaProducerConfig {
     @Bean
     NewTopic topicTransacciones() {
         Map<String, String> configs = new HashMap<>();
-        configs.put("retention.ms", "43200000"); // 12 horas de retenciÃ³n de mensajes
+        configs.put("retention.ms", "43200000");
         return new NewTopic(TOPIC, 3, (short) 3).configs(configs);
     }
 
     @Bean
-    ProducerFactory<String, EventoTransaccionDTO> producerFactory() {
+    ProducerFactory<String, EventoBatchDTO> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -54,7 +54,9 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, EventoTransaccionDTO> kafkaTemplate() {
+    public KafkaTemplate<String, EventoBatchDTO> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 }
+
+

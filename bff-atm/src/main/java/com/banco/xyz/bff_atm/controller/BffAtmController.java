@@ -1,10 +1,11 @@
-package com.banco.xyz.bff_atm.controller;
+﻿package com.banco.xyz.bff_atm.controller;
 
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,6 +13,8 @@ import com.banco.xyz.bff_atm.dto.atm.EstadoCuentaAtmDTO;
 import com.banco.xyz.bff_atm.dto.atm.InteresesAtmDTO;
 import com.banco.xyz.bff_atm.dto.atm.TransaccionAtmDTO;
 import com.banco.xyz.bff_atm.service.BffAtmService;
+
+
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class BffAtmController {
 
     private final BffAtmService service;
+    
 
     @GetMapping("/estadoCuentas")
     public ResponseEntity<List<EstadoCuentaAtmDTO>> listadoEstadoCuentas() {
@@ -51,4 +55,13 @@ public class BffAtmController {
     public ResponseEntity<TransaccionAtmDTO> obtenerTransaccionPorId(@PathVariable Long id) {
         return ResponseEntity.ok(service.obtenerTransaccionPorId(id));
     }
+
+    
+
+    
+
+    
 }
+
+
+

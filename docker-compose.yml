@@ -1,4 +1,4 @@
-version: '3.8'
+﻿version: '3.8'
 
 services:
   mysql-db:
@@ -81,10 +81,12 @@ services:
     depends_on:
       - config-server
       - eureka-server
+      - auth-server
     environment:
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - MS-BANK-LEGACY_URL=http://bank-legacy:8080
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://auth-server:9000
 
   bff-atm:
     build: ./bff-atm
@@ -95,9 +97,12 @@ services:
     depends_on:
       - config-server
       - eureka-server
+      - auth-server
     environment:
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - MS-BANK-LEGACY_URL=http://bank-legacy:8080
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://auth-server:9000
+
 
 
