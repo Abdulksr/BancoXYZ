@@ -1,4 +1,4 @@
-﻿package com.banco.xyz.bff_web.controller;
+package com.banco.xyz.bff_web.controller;
 
 import java.util.List;
 

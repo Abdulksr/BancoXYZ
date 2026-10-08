@@ -1,4 +1,4 @@
-﻿package com.banco.xyz.batch.dtos.event;
+package com.banco.xyz.batch.dtos.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

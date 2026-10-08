@@ -1,4 +1,4 @@
-﻿package com.banco.xyz.bff_web.dto.event;
+package com.banco.xyz.bff_web.dto.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

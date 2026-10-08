@@ -1,4 +1,4 @@
-﻿package com.banco.xyz.bff_web.config;
+package com.banco.xyz.bff_web.config;
 
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;

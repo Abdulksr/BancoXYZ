@@ -1,4 +1,4 @@
-﻿package com.banco.xyz.batch.config;
+package com.banco.xyz.batch.config;
 
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
